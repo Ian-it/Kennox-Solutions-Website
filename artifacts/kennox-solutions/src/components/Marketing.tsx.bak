@@ -1,0 +1,152 @@
+import { ArrowRight, Check, Cpu, Megaphone, Quote, Rocket, Sparkles } from 'lucide-react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { Reveal } from '@/components/Reveal';
+import { services, testimonials, values, type ServicePillar } from '@/data/site';
+
+const iconMap = { sparkles: Sparkles, megaphone: Megaphone, cpu: Cpu, rocket: Rocket };
+
+// Cycling accent palette for branded "topic" card headers — literal class
+// strings so Tailwind's static scanner can pick them up at build time.
+// Gold is intentionally excluded here (too low-contrast/dull for these
+// blocks) — green and maroon alternate instead.
+const accents = [
+  { bg: 'bg-[hsl(var(--primary))]', text: 'text-[hsl(var(--primary))]' },
+  { bg: 'bg-[hsl(var(--accent))]', text: 'text-[hsl(var(--accent))]' },
+];
+export function accentFor(index: number) {
+  return accents[index % accents.length];
+}
+
+export function SectionIntro({ eyebrow, title, children, dark = false }: { eyebrow: string; title: ReactNode; children?: ReactNode; dark?: boolean }) {
+  return <div className={`max-w-2xl ${dark ? 'text-[hsl(var(--primary-foreground))]' : ''}`}>
+    <Reveal as="span" className="eyebrow block"><span className={dark ? 'text-[hsl(var(--secondary))]' : 'text-[hsl(var(--accent))]'}>{eyebrow}</span></Reveal>
+    <Reveal delay={0.08}><h2 className="serif mt-4 text-4xl leading-[1.05] tracking-[-.03em] sm:text-5xl md:text-6xl">{title}</h2></Reveal>
+    {children && <Reveal delay={0.16}><div className={`mt-5 max-w-lg text-base leading-relaxed ${dark ? 'text-[hsl(var(--primary-foreground)/.7)]' : 'text-[hsl(var(--muted-foreground))]'}`}>{children}</div></Reveal>}
+  </div>;
+}
+
+export function ArtPanel({ compact = false }: { compact?: boolean }) {
+  const ringSize = compact
+    ? 'left-[24%] top-[10%] h-[36%] w-[36%] border-[10px] shadow-[0_0_0_6px_hsl(var(--primary)),0_0_0_7px_hsl(var(--secondary)/.3)] sm:left-[20%] sm:top-[12%] sm:h-[40%] sm:w-[40%] sm:border-[13px]'
+    : 'left-[20%] top-[12%] h-[40%] w-[40%] border-[12px] shadow-[0_0_0_7px_hsl(var(--primary)),0_0_0_8px_hsl(var(--secondary)/.3)] sm:left-[17%] sm:top-[14%] sm:h-[44%] sm:w-[44%] sm:border-[14px] sm:shadow-[0_0_0_9px_hsl(var(--primary)),0_0_0_10px_hsl(var(--secondary)/.3)]';
+  return <div className={`relative overflow-hidden rounded-[1.75rem] bg-[hsl(var(--primary))] ${compact ? 'h-[220px]' : 'h-[240px] sm:h-auto sm:min-h-[260px]'} p-5 sm:p-6 text-[hsl(var(--primary-foreground))]`}>
+    <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full border-[1px] border-[hsl(var(--secondary)/.4)]" /><div className="absolute -right-3 top-0 h-56 w-56 rounded-full border-[1px] border-[hsl(var(--secondary)/.25)]" />
+    <div className="absolute -bottom-28 -left-24 h-80 w-80 rounded-full bg-[hsl(var(--secondary)/.28)] blur-3xl" />
+    <div className={`absolute rotate-12 rounded-full border-[hsl(var(--secondary))] ${ringSize}`}>
+      <div className="absolute inset-[15%] rounded-full border border-[hsl(var(--primary)/.4)]" /><div className="absolute inset-[31%] rounded-full bg-[hsl(var(--secondary))]" /><div className="absolute inset-[43%] rounded-full bg-[hsl(var(--secondary))]" />
+    </div>
+    <div className="absolute right-5 top-5 grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[hsl(var(--primary-foreground)/.35)] sm:right-6 sm:top-6 sm:h-10 sm:w-10"><Sparkles size={14} /></div>
+    <div className="absolute inset-x-5 bottom-5 z-10 sm:inset-x-6 sm:bottom-6">
+      <p className="eyebrow text-[hsl(var(--secondary))]">Brand · Technology · Innovations</p>
+      <p className="serif mt-1.5 max-w-[15rem] text-lg italic leading-tight sm:text-xl">Turning ideas into meaningful solutions.</p>
+    </div>
+  </div>;
+}
+
+const marqueeItems: ReactNode[] = [
+  <span key="s1" className="serif text-lg italic text-[hsl(var(--primary-foreground))]">"{testimonials[0].quote.split('.')[0]}."</span>,
+  <span key="f1" className="flex items-center gap-2 text-sm font-bold uppercase tracking-[.14em] text-[hsl(var(--secondary))]"><span className="serif text-xl not-italic">{values.length.toString().padStart(2, '0')}</span> values behind every project</span>,
+  <span key="s2" className="serif text-lg italic text-[hsl(var(--primary-foreground))]">"{testimonials[1].quote.split('.')[0]}."</span>,
+  <span key="f2" className="text-sm font-bold uppercase tracking-[.14em] text-[hsl(var(--secondary))]">Real ideas. Real strategy. Real impact.</span>,
+  <span key="s3" className="serif text-lg italic text-[hsl(var(--primary-foreground))]">"{testimonials[2].quote.split('.')[0]}."</span>,
+  <span key="f3" className="flex items-center gap-2 text-sm font-bold uppercase tracking-[.14em] text-[hsl(var(--secondary))]"><span className="serif text-xl not-italic">{services.length.toString().padStart(2, '0')}</span> ways to bring your idea to life</span>,
+];
+
+export function KennoxMarquee({ className = '' }: { className?: string }) {
+  const track = [...marqueeItems, ...marqueeItems];
+  return (
+    <div className={`marquee-mask overflow-hidden bg-[hsl(var(--primary))] py-2.5 ${className}`}>
+      <div className="marquee-track flex w-max items-center gap-10">
+        {track.map((item, index) => (
+          <span key={index} className="flex items-center gap-10">
+            {item}
+            <Sparkles size={14} className="shrink-0 text-[hsl(var(--secondary)/.5)]" />
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ServiceCard({ service, active, onSelect }: { service: ServicePillar; active: boolean; onSelect: () => void }) {
+  const Icon = iconMap[service.icon];
+  return <button type="button" onClick={onSelect} className={`group flex w-full items-start gap-4 border-t py-5 text-left transition-colors ${active ? 'border-[hsl(var(--secondary))] text-[hsl(var(--primary-foreground))]' : 'border-[hsl(var(--primary-foreground)/.25)] text-[hsl(var(--primary-foreground)/.72)] hover:text-[hsl(var(--primary-foreground))]'}`} data-testid={`button-service-${service.id}`}><span className={`eyebrow pt-1 ${active ? 'text-[hsl(var(--secondary))]' : 'text-[hsl(var(--primary-foreground)/.58)]'}`}>{service.number}</span><span className="flex-1"><span className="block text-lg font-semibold">{service.title}</span><span className="mt-1 block text-sm">{service.short}</span></span><span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-all ${active ? 'rotate-45 border-[hsl(var(--secondary))] bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]' : 'border-[hsl(var(--primary-foreground)/.3)] group-hover:border-[hsl(var(--primary-foreground))]'}`}><Icon size={15} /></span></button>;
+}
+
+export function ServiceExplorer({ limit }: { limit?: number }) {
+  const shown = limit ? services.slice(0, limit) : services;
+  const [activeId, setActiveId] = useState(shown[0].id);
+  const active = shown.find((service) => service.id === activeId) ?? shown[0];
+
+  return <div className="grid items-start gap-10 lg:grid-cols-[1.35fr_1fr] lg:gap-14"><div className="grid gap-x-8 sm:grid-cols-2">{shown.map((service) => <ServiceCard key={service.id} service={service} active={service.id === active.id} onSelect={() => setActiveId(service.id)} />)}</div><div key={active.id} className="reveal relative overflow-hidden rounded-[1.75rem] bg-[hsl(var(--background))] p-8 text-[hsl(var(--foreground))] shadow-[var(--shadow-md)] sm:p-10"><div className="absolute -right-16 -top-16 h-52 w-52 rounded-full border-[22px] border-[hsl(var(--secondary)/.75)]" /><div className="absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-[hsl(var(--secondary)/.3)] blur-2xl" /><div className="relative"><p className="eyebrow text-[hsl(var(--accent))]">A closer look / {active.number}</p><h3 className="serif mt-6 max-w-md text-3xl leading-tight sm:text-4xl">{active.title}</h3><p className="mt-4 max-w-md leading-relaxed text-[hsl(var(--muted-foreground))]">{active.description}</p><ul className="mt-6 grid gap-3">{active.detail.map((item) => <li key={item} className="flex items-start gap-2 text-sm font-semibold"><Check size={15} className="mt-0.5 shrink-0 text-[hsl(var(--secondary))]" />{item}</li>)}</ul></div></div></div>;
+}
+
+export function PillarsBand() {
+  return <div className="grid gap-6 sm:grid-cols-3">
+    {[
+      { title: 'Brand', text: 'Identity, creativity & communication' },
+      { title: 'Technology', text: 'Systems, intelligence & platforms' },
+      { title: 'Innovations', text: 'Experimentation, ventures & future' },
+    ].map((pillar, index) => (
+      <Reveal key={pillar.title} organic delay={index * 0.07} className="rounded-[1.5rem] border border-[hsl(var(--primary-foreground)/.2)] p-7">
+        <p className="eyebrow text-[hsl(var(--secondary))]">{pillar.title}</p>
+        <p className="mt-3 text-sm leading-relaxed text-[hsl(var(--primary-foreground)/.72)]">{pillar.text}</p>
+      </Reveal>
+    ))}
+  </div>;
+}
+
+export function ArrowLink({ href, children }: { href: string; children: ReactNode }) {
+  return <a href={href} className="inline-flex items-center gap-1.5 text-sm font-semibold text-[hsl(var(--accent))]">{children} <ArrowRight size={14} /></a>;
+}
+
+export function TestimonialSlideshow() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || paused) return;
+    timerRef.current = setInterval(() => {
+      setIndex((current) => (current + 1) % testimonials.length);
+    }, 5500);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [paused]);
+
+  const active = testimonials[index];
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-[1.75rem] border border-[hsl(var(--border))] bg-[hsl(var(--muted)/.4)] p-8 sm:p-12"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+      data-testid="testimonial-slideshow"
+    >
+      <Quote size={32} className="text-[hsl(var(--secondary))]" />
+      <div key={index} className="reveal mt-6 min-h-[7.5rem] sm:min-h-[6rem]">
+        <p className="serif max-w-2xl text-2xl leading-snug sm:text-3xl">"{active.quote}"</p>
+        <p className="mt-6 text-sm font-bold uppercase tracking-[.1em] text-[hsl(var(--muted-foreground))]">
+          {active.name} <span className="font-normal normal-case tracking-normal">— {active.role}</span>
+        </p>
+      </div>
+      <div className="mt-8 flex items-center gap-2">
+        {testimonials.map((testimonial, dotIndex) => (
+          <button
+            key={testimonial.name}
+            type="button"
+            onClick={() => setIndex(dotIndex)}
+            aria-label={`Show testimonial ${dotIndex + 1}`}
+            className={`h-1.5 rounded-full transition-all ${dotIndex === index ? 'w-7 bg-[hsl(var(--secondary))]' : 'w-1.5 bg-[hsl(var(--border))]'}`}
+            data-testid={`dot-testimonial-${dotIndex}`}
+          />
+        ))}
+        <span className="ml-3 text-[.65rem] font-semibold uppercase tracking-[.1em] text-[hsl(var(--muted-foreground)/.7)]">Sample content</span>
+      </div>
+    </div>
+  );
+}

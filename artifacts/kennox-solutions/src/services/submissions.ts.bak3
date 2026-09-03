@@ -1,0 +1,17 @@
+export interface ContactSubmission {
+  fullName: string;
+  company: string;
+  email: string;
+  phone: string;
+  interest: string;
+  message: string;
+}
+
+const wait = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
+
+export async function submitContact(data: ContactSubmission): Promise<{ subject: string }> {
+  await wait(350);
+  const subject = `Project inquiry from ${data.fullName}`;
+  window.location.href = `mailto:info@kennoxsolutions.co.ke?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Full name: ${data.fullName}\nCompany / Organization: ${data.company || 'N/A'}\nEmail: ${data.email}\nPhone: ${data.phone || 'N/A'}\nInterested in: ${data.interest}\n\n${data.message}`)}`;
+  return { subject };
+}

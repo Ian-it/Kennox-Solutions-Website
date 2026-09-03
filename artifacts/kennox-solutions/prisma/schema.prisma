@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MusicSubmission {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  tradeName   String
+  phone       String
+  isGroup     Boolean
+  memberCount Int?
+  link        String
+  submittedAt DateTime @default(now())
+  status      String   @default("new")
+}
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String
+  address     String
+  subject     String
+  message     String
+  submittedAt DateTime @default(now())
+  status      String   @default("new")
+}
+
+model MemberProfile {
+  id         String   @id @default(cuid())
+  firstName  String
+  lastName   String
+  phone      String
+  loginEmail String   @unique
+  createdAt  DateTime @default(now())
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  title       String
+  quote       String
+  photoUrl    String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
